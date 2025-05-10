@@ -1,12 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import Header from "@/components/Header";
+import NavBar from "@/components/NavBar";
+import DashboardStats from "@/components/DashboardStats";
+import StreakCard from "@/components/StreakCard";
+import DailyChallenge from "@/components/DailyChallenge";
+import SmartTips from "@/components/SmartTips";
+import SpendingBreakdown from "@/components/SpendingBreakdown";
+import SavingsGoals from "@/components/SavingsGoals";
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background pb-20">
+      <div className="container max-w-4xl mx-auto px-4 py-6">
+        <Header />
+        
+        <DashboardStats />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <StreakCard />
+            <SmartTips />
+          </div>
+          <div>
+            <DailyChallenge />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <SpendingBreakdown />
+          <SavingsGoals />
+        </div>
       </div>
+      
+      <NavBar />
     </div>
   );
 };

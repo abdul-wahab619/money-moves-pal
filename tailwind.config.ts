@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Money Moves Pal custom colors
+				'money-mint': '#9AECDB',
+				'money-coral': '#FF9A8B',
+				'money-lavender': '#D4A5FF',
+				'money-yellow': '#FFEB99',
+				'money-blue': '#A5C8FF'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +91,48 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'pulse-soft': {
+					'0%, 100%': {
+						opacity: '1',
+					},
+					'50%': {
+						opacity: '0.8',
+					},
+				},
+				'bounce-small': {
+					'0%, 100%': {
+						transform: 'translateY(0)',
+					},
+					'50%': {
+						transform: 'translateY(-5px)',
+					},
+				},
+				'scale-in': {
+					'0%': {
+						transform: 'scale(0.95)',
+						opacity: '0',
+					},
+					'100%': {
+						transform: 'scale(1)',
+						opacity: '1',
+					},
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
+				'bounce-small': 'bounce-small 2s infinite ease-in-out',
+				'scale-in': 'scale-in 0.2s ease-out',
+			},
+			backgroundImage: {
+				'gradient-mint': 'linear-gradient(135deg, #9AECDB 0%, #65C8B4 100%)',
+				'gradient-coral': 'linear-gradient(135deg, #FF9A8B 0%, #FF6B6B 100%)',
+				'gradient-lavender': 'linear-gradient(135deg, #D4A5FF 0%, #A555E2 100%)',
+				'gradient-yellow': 'linear-gradient(135deg, #FFEB99 0%, #FFD369 100%)',
+				'gradient-blue': 'linear-gradient(135deg, #A5C8FF 0%, #7B9DFF 100%)',
+			},
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
