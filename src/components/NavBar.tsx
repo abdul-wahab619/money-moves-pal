@@ -1,33 +1,45 @@
 
-import { CircleDollarSign, Wallet, ChartPieIcon, PiggyBank, BadgeDollarSign, Menu } from "lucide-react";
+import { CircleDollarSign, Wallet, ChartPieIcon, PiggyBank, BadgeDollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const NavBar = () => {
-  const [active, setActive] = useState("dashboard");
+  const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+  
+  // Set active tab based on current route
+  const getActiveTabFromPath = () => {
+    const path = location.pathname;
+    if (path === "/") return "dashboard";
+    if (path === "/budget") return "budget";
+    if (path === "/goals") return "goals";
+    if (path === "/insights") return "insights";
+    if (path === "/rewards") return "rewards";
+    return "dashboard";
+  };
+  
+  const [active, setActive] = useState(getActiveTabFromPath());
+  
+  // Update active tab when route changes
+  useEffect(() => {
+    setActive(getActiveTabFromPath());
+  }, [location.pathname]);
 
   const navItems = [
-    { id: "dashboard", name: "Dashboard", icon: CircleDollarSign },
-    { id: "budget", name: "Budget", icon: Wallet },
-    { id: "goals", name: "Goals", icon: PiggyBank },
-    { id: "insights", name: "Insights", icon: ChartPieIcon },
-    { id: "rewards", name: "Rewards", icon: BadgeDollarSign },
+    { id: "dashboard", name: "Dashboard", icon: CircleDollarSign, path: "/" },
+    { id: "budget", name: "Budget", icon: Wallet, path: "/budget" },
+    { id: "goals", name: "Goals", icon: PiggyBank, path: "/goals" },
+    { id: "insights", name: "Insights", icon: ChartPieIcon, path: "/insights" },
+    { id: "rewards", name: "Rewards", icon: BadgeDollarSign, path: "/rewards" },
   ];
 
-  const handleNavClick = (id: string) => {
+  const handleNavClick = (id: string, path: string) => {
     setActive(id);
-    
-    // Show toast for non-dashboard items
-    if (id !== "dashboard") {
-      toast({
-        title: `${id.charAt(0).toUpperCase() + id.slice(1)} Coming Soon!`,
-        description: "This feature will be available in the next update.",
-        duration: 2000,
-      });
-    }
+    navigate(path);
   };
 
   return (
@@ -47,7 +59,7 @@ const NavBar = () => {
                       ? "text-primary bg-primary/10 scale-110" 
                       : "text-muted-foreground hover:scale-105"
                   )}
-                  onClick={() => handleNavClick(item.id)}
+                  onClick={() => handleNavClick(item.id, item.path)}
                 >
                   <item.icon className={cn(
                     "h-5 w-5 transition-all",

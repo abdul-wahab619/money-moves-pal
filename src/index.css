@@ -104,3 +104,80 @@
     @apply text-transparent bg-clip-text;
   }
 }
+
+@keyframes bounce-small {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-bounce-small {
+  animation: bounce-small 2s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #9AECDB 0%, #56CCF2 100%);
+}
+
+.bg-gradient-mint {
+  background: linear-gradient(135deg, #9AECDB 0%, #55EFC4 100%);
+}
+
+.bg-gradient-coral {
+  background: linear-gradient(135deg, #FF9F7F 0%, #FF6B6B 100%);
+}
+
+.bg-gradient-lavender {
+  background: linear-gradient(135deg, #E5DEFF 0%, #A5B4FC 100%);
+}
+
+/* Money-specific colors */
+.bg-money-mint {
+  background-color: #9AECDB;
+}
+
+.bg-money-coral {
+  background-color: #FF9F7F;
+}
+
+.bg-money-blue {
+  background-color: #7FCFFF;
+}
+
+.bg-money-lavender {
+  background-color: #E5DEFF;
+}
+
+.text-money-mint {
+  color: #55EFC4;
+}
+
+.text-money-coral {
+  color: #FF6B6B;
+}
+
+.text-money-blue {
+  color: #56CCF2;
+}
+
+.text-money-lavender {
+  color: #A5B4FC;
+}
+
