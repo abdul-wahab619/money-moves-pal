@@ -1,54 +1,200 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, ArrowRight, ArrowLeft, Lightbulb, Bookmark, Share } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+interface Tip {
+  id: string;
+  title: string;
+  content: string;
+  tag: string;
+  emoji: string;
+}
+
+interface UserTip {
+  id: string;
+  tip_id: string;
+  liked: boolean;
+  saved: boolean;
+}
 
 const SmartTips = () => {
   const [currentTip, setCurrentTip] = useState(0);
-  const [likedTips, setLikedTips] = useState<number[]>([]);
-  const [savedTips, setSavedTips] = useState<number[]>([]);
+  const [tips, setTips] = useState<Tip[]>([]);
+  const [userTips, setUserTips] = useState<Record<string, UserTip>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const tips = [
-    {
-      title: "Coffee Savings Hack",
-      content: "Making coffee at home instead of buying it daily can save you ~$100/month.",
-      tag: "Saving",
-      emoji: "☕"
-    },
-    {
-      title: "Student Loan Tip",
-      content: "Pay a little extra on your student loans each month to reduce the interest paid over time.",
-      tag: "Loans",
-      emoji: "🎓"
-    },
-    {
-      title: "Low-Risk Investing",
-      content: "New to investing? Start with an S&P 500 index fund for long-term growth.",
-      tag: "Investing",
-      emoji: "📈"
-    },
-    {
-      title: "Subscription Audit",
-      content: "Review your subscriptions today. You might be paying for services you don't use.",
-      tag: "Budget",
-      emoji: "🔍"
+  // Fetch tips from the database
+  useEffect(() => {
+    const fetchTips = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('ai_tips')
+          .select('*');
+        
+        if (error) throw error;
+        if (data) setTips(data);
+      } catch (error) {
+        console.error("Error fetching tips:", error);
+        toast({
+          title: "Error fetching tips",
+          description: "Please try again later",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTips();
+  }, []);
+
+  // Fetch user's liked and saved tips
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUserTips = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_saved_tips')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        
+        if (data) {
+          const userTipsMap: Record<string, UserTip> = {};
+          data.forEach(userTip => {
+            userTipsMap[userTip.tip_id] = userTip;
+          });
+          setUserTips(userTipsMap);
+        }
+      } catch (error) {
+        console.error("Error fetching user tips:", error);
+      }
+    };
+
+    fetchUserTips();
+  }, [user]);
+
+  const handleLike = async (tipId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to like tips",
+      });
+      return;
     }
-  ];
 
-  const handleLike = (index: number) => {
-    if (likedTips.includes(index)) {
-      setLikedTips(likedTips.filter((i) => i !== index));
-    } else {
-      setLikedTips([...likedTips, index]);
+    try {
+      const existingUserTip = userTips[tipId];
+      
+      if (existingUserTip) {
+        // Update existing record
+        const { error } = await supabase
+          .from('user_saved_tips')
+          .update({ liked: !existingUserTip.liked })
+          .eq('id', existingUserTip.id);
+          
+        if (error) throw error;
+        
+        // Update local state
+        setUserTips({
+          ...userTips,
+          [tipId]: { ...existingUserTip, liked: !existingUserTip.liked }
+        });
+      } else {
+        // Create new record
+        const { data, error } = await supabase
+          .from('user_saved_tips')
+          .insert({
+            user_id: user.id,
+            tip_id: tipId,
+            liked: true,
+            saved: false
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        // Update local state
+        if (data) {
+          setUserTips({
+            ...userTips,
+            [tipId]: data
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error updating like status:", error);
+      toast({
+        title: "Error",
+        description: "Could not update like status",
+      });
     }
   };
 
-  const handleSave = (index: number) => {
-    if (savedTips.includes(index)) {
-      setSavedTips(savedTips.filter((i) => i !== index));
-    } else {
-      setSavedTips([...savedTips, index]);
+  const handleSave = async (tipId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save tips",
+      });
+      return;
+    }
+
+    try {
+      const existingUserTip = userTips[tipId];
+      
+      if (existingUserTip) {
+        // Update existing record
+        const { error } = await supabase
+          .from('user_saved_tips')
+          .update({ saved: !existingUserTip.saved })
+          .eq('id', existingUserTip.id);
+          
+        if (error) throw error;
+        
+        // Update local state
+        setUserTips({
+          ...userTips,
+          [tipId]: { ...existingUserTip, saved: !existingUserTip.saved }
+        });
+      } else {
+        // Create new record
+        const { data, error } = await supabase
+          .from('user_saved_tips')
+          .insert({
+            user_id: user.id,
+            tip_id: tipId,
+            liked: false,
+            saved: true
+          })
+          .select()
+          .single();
+          
+        if (error) throw error;
+        
+        // Update local state
+        if (data) {
+          setUserTips({
+            ...userTips,
+            [tipId]: data
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error updating save status:", error);
+      toast({
+        title: "Error",
+        description: "Could not update save status",
+      });
     }
   };
 
@@ -60,7 +206,69 @@ const SmartTips = () => {
     setCurrentTip((prev) => (prev - 1 + tips.length) % tips.length);
   };
 
+  const handleShare = async () => {
+    if (tips.length === 0) return;
+    
+    const tip = tips[currentTip];
+    
+    try {
+      await navigator.share({
+        title: `Money Moves - ${tip.title}`,
+        text: `${tip.emoji} ${tip.content} #${tip.tag} via Money Moves`
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+      toast({
+        title: "Sharing not supported",
+        description: "This feature is not supported in your browser",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="money-card mb-6 bg-gradient-blue relative overflow-hidden">
+        <CardHeader className="relative z-10">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-lg font-medium">Money Tip</CardTitle>
+              <CardDescription>Loading tips...</CardDescription>
+            </div>
+            <Lightbulb className="h-5 w-5 text-yellow-300 animate-pulse" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="bg-white/20 p-4 rounded-lg mb-4 h-32 animate-pulse"></div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (tips.length === 0) {
+    return (
+      <Card className="money-card mb-6 bg-gradient-blue relative overflow-hidden">
+        <CardHeader className="relative z-10">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-lg font-medium">Money Tip</CardTitle>
+              <CardDescription>No tips available</CardDescription>
+            </div>
+            <Lightbulb className="h-5 w-5 text-yellow-300" />
+          </div>
+        </CardHeader>
+        <CardContent className="relative z-10">
+          <div className="bg-white/20 p-4 rounded-lg mb-4">
+            <p>Check back later for financial tips!</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const tip = tips[currentTip];
+  const userTip = userTips[tip.id];
+  const isLiked = userTip?.liked || false;
+  const isSaved = userTip?.saved || false;
 
   return (
     <Card className="money-card mb-6 bg-gradient-blue relative overflow-hidden">
@@ -94,22 +302,22 @@ const SmartTips = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => handleLike(currentTip)}
-              className={likedTips.includes(currentTip) ? "text-accent bg-white/10" : ""}
+              onClick={() => handleLike(tip.id)}
+              className={isLiked ? "text-accent bg-white/10" : ""}
             >
-              <Heart className="h-5 w-5" fill={likedTips.includes(currentTip) ? "#FF6B6B" : "none"} />
+              <Heart className="h-5 w-5" fill={isLiked ? "#FF6B6B" : "none"} />
             </Button>
             
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => handleSave(currentTip)}
-              className={savedTips.includes(currentTip) ? "text-primary bg-white/10" : ""}
+              onClick={() => handleSave(tip.id)}
+              className={isSaved ? "text-primary bg-white/10" : ""}
             >
-              <Bookmark className="h-5 w-5" fill={savedTips.includes(currentTip) ? "#9AECDB" : "none"} />
+              <Bookmark className="h-5 w-5" fill={isSaved ? "#9AECDB" : "none"} />
             </Button>
             
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={handleShare}>
               <Share className="h-5 w-5" />
             </Button>
           </div>

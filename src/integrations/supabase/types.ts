@@ -9,7 +9,196 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ai_tips: {
+        Row: {
+          content: string
+          created_at: string
+          emoji: string
+          id: string
+          tag: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          emoji: string
+          id?: string
+          tag: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          tag?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      budget_categories: {
+        Row: {
+          budget_id: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          percentage: number
+          updated_at: string
+        }
+        Insert: {
+          budget_id: string
+          created_at?: string
+          icon: string
+          id?: string
+          name: string
+          percentage: number
+          updated_at?: string
+        }
+        Update: {
+          budget_id?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          percentage?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_categories_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          created_at: string
+          id: string
+          monthly_income: number
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          monthly_income?: number
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          monthly_income?: number
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      goals: {
+        Row: {
+          completed: boolean
+          created_at: string
+          current_amount: number
+          description: string | null
+          id: string
+          target_amount: number
+          target_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          id?: string
+          target_amount: number
+          target_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          current_amount?: number
+          description?: string | null
+          id?: string
+          target_amount?: number
+          target_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_saved_tips: {
+        Row: {
+          created_at: string
+          id: string
+          liked: boolean
+          saved: boolean
+          tip_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          liked?: boolean
+          saved?: boolean
+          tip_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          liked?: boolean
+          saved?: boolean
+          tip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_saved_tips_tip_id_fkey"
+            columns: ["tip_id"]
+            isOneToOne: false
+            referencedRelation: "ai_tips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
